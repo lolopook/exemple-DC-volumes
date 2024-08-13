@@ -1,0 +1,35 @@
+# docker-compose.yml
+services:
+  web:
+    ports:
+      - 80:80
+    volumes:
+      - .:/var/www/html # volume contenant le code de l'application 
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+  db:
+    image: mysql:8.0 # image de mysql
+    container_name: database 
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root # password de l'utilisateur root
+      MYSQL_DATABASE: artists # nom de la base de donnée
+      MYSQL_USER: username # nom de l'utilisateur
+      MYSQL_PASSWORD: password # mot de passe de l'utilisateur
+    volumes:
+      - ./data:/var/lib/mysql # volume contenant la base de donnée
+      - .:/docker-entrypoint-initdb.d # script d'initialisation afin qu'il fasse une copie de la base de donnée
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin  # image de phpmyadmin
+    environment: 
+      - PMA_ARBITRARY=1 
+      - PMA_HOST=database # nom du conteneur
+      - PMA_USER=username # nom de l'utilisateur
+      - PMA_PASSWORD=password # mot de passe de l'utilisateur
+    ports:
+      - 8888:80
